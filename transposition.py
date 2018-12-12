@@ -4,10 +4,12 @@ import math
 
 class Transposition:
     def __init__(self):
-        self.key_length = 0
+        # length of key.
+        self.n_col = 0
         self.ordered_columns = None
         self.data = str()
-        self.number_of_row = 0
+        # number of rows.
+        self.n_row = 0
         self.cipher = str()
         self.conditions = list()
         self.data_length: int = 0
@@ -18,14 +20,14 @@ class Transposition:
         for i in range(len(key)):
             od[key[i]] = i
         filtered_key = list(od.keys())
-        self.key_length = len(filtered_key)
+        self.n_col = len(filtered_key)
         # sort key.
         sorted_key = sorted(filtered_key)
         for i in range(len(filtered_key)):
             od[sorted_key[i]] = i
         # get right order.
-        self.ordered_columns = list(range(self.key_length))
-        for i in range(self.key_length):
+        self.ordered_columns = list(range(self.n_col))
+        for i in range(self.n_col):
             self.ordered_columns[od[filtered_key[i]]] = i
 
     def set_filter(self, conditions: list):
@@ -42,22 +44,19 @@ class Transposition:
             data = filtered_data
         # complete data.
         self.data_length = len(data)
-        self.number_of_row = math.ceil(len(data) / self.key_length)
-        padding_length: int = self.number_of_row * self.key_length - len(data)
+        self.n_row = math.ceil(len(data) / self.n_col)
+        padding_length: int = self.n_row * self.n_col - len(data)
         self.data = data + ''.join([chr(i) for i in range(ord('a'), ord('a') + padding_length)])
 
     def encrypt(self):
-        self.cipher = str()
-        for i in range(self.key_length):
-            for j in range(self.number_of_row):
-                self.cipher += self.data[self.ordered_columns[i] + j * self.key_length]
+        self.cipher = ''.join([self.data[self.ordered_columns[i//self.n_row]+i % self.n_row*self.n_col] for i in range(self.n_col*self.n_row)])
         return self.cipher
 
     def decrypt(self):
-        plan = list(range(self.number_of_row * self.key_length))
-        for i in range(self.key_length):
-            for j in range(self.number_of_row):
-                plan[self.ordered_columns[i] + j * self.key_length] = self.cipher[i * self.number_of_row + j]
+        plan = list(range(self.n_row * self.n_col))
+        for i in range(self.n_col):
+            for j in range(self.n_row):
+                plan[self.ordered_columns[i] + j * self.n_col] = self.cipher[i * self.n_row + j]
         return ''.join(plan)
     
     def get_data_length(self):
